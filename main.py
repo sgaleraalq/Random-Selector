@@ -14,10 +14,10 @@ class RandomSelector():
         self.lines_list         = None
         self.selected_letters   = None
         self.all_indices        = None
-        self.interval_x         = 0.1
-        self.interval_y         = 0.1
+        self.interval_x         = 0.5
+        self.interval_y         = 0.01
         self.stop_event         = threading.Event()
-        self.index              = float("inf")
+        self.last_choice        = ""
 
     def initialize(self):
         self.console_out = curses.initscr()
@@ -28,6 +28,7 @@ class RandomSelector():
         self.all_indices = list(range(len(self.selected)))
 
         curses.start_color()
+        curses.curs_set(0)
         curses.init_pair(self.colors["black"], curses.COLOR_BLACK, curses.COLOR_BLACK)
         curses.init_pair(self.colors["green"], curses.COLOR_GREEN, curses.COLOR_BLACK)
 
@@ -36,8 +37,9 @@ class RandomSelector():
         curses.endwin()
 
     def get_random(self):
-        self.index = random.choice(self.all_indices)
-        self.all_indices.remove(self.index)
+        index = random.choice(self.all_indices)
+        self.all_indices.remove(index)
+        self.selected_letters[index] = self.selected[index]
         return
 
     def main(self):
@@ -48,14 +50,17 @@ class RandomSelector():
         thread_x.start()
         thread_y.start()
 
-        start_time = time.time()
         try:
-            while time.time() - start_time < 2:
+            while not self.stop_event.is_set():
                 self.console_out.refresh()
                 time.sleep(0.1)
 
-            self.stop_event.set()
-            self.stop_curses
+                if len(self.all_indices) == 0:
+                    self.stop_event.set()
+                    break
+
+            if self.console_out.getch():
+                self.stop_curses
 
         except KeyboardInterrupt:
             self.stop_event.set()
@@ -65,7 +70,17 @@ class RandomSelector():
 
     def print_all_choices(self):
         while not self.stop_event.is_set():
+            new_choice = random.choice(self.items)
+            if new_choice != self.last_choice:
+                self.last_choice = new_choice
+                self.lines_list.append(new_choice)
+                self.lines_list.pop(0)
+            
+            self.console_out.move(curses.LINES - 1, curses.COLS - 1)
+
             for index, word in enumerate(self.lines_list):
+                self.console_out.move(index * 2, 0)
+                self.console_out.clrtoeol()
                 for letter in range(len(word)):
                     if letter <= len(self.selected_letters) - 1 and self.selected_letters[letter] == word[letter]:
                         self.console_out.attron(curses.color_pair(self.colors["green"]))
@@ -78,8 +93,8 @@ class RandomSelector():
 
     def print_selected(self):
         while not self.stop_event.is_set():
-            self.get_random()
-            print(self.selected_letters)
+            if len(self.all_indices) > 0: 
+                self.get_random()
             for letter in range(len(self.selected_letters)):
                 if self.selected_letters[letter] != "":
                     self.console_out.attron(curses.color_pair(self.colors["green"]))
@@ -89,5 +104,11 @@ class RandomSelector():
 
         return
 
-selector = RandomSelector(["apple", "banana", "orange", "grape", "kiwi", "mango", "pear", "peach", "plum", "strawberry"])
+selector = RandomSelector(["Sergio Galera Alquegui",
+                        "Sergio Fernandez Adan",
+                        "Oliver Kjaerlund",
+                        "Javier Fernandez",
+                        "Maria Sebastiana Whatever",
+                        "Otro Nombre Cualquiera",
+                        "Simplemente Loque Sea"])
 selector.main()

@@ -14,9 +14,10 @@ class RandomSelector():
         self.lines_list         = None
         self.selected_letters   = None
         self.all_indices        = None
-        self.interval_x         = 1
+        self.interval_x         = 0.1
         self.interval_y         = 0.1
         self.stop_event         = threading.Event()
+        self.index              = float("inf")
 
     def initialize(self):
         self.console_out = curses.initscr()
@@ -34,10 +35,10 @@ class RandomSelector():
     def stop_curses(self):
         curses.endwin()
 
-    def get_random(self, lst: list):
-        index = random.choice(lst)
-        lst.remove(index)
-        return lst, index
+    def get_random(self):
+        self.index = random.choice(self.all_indices)
+        self.all_indices.remove(self.index)
+        return
 
     def main(self):
         self.initialize()
@@ -47,15 +48,20 @@ class RandomSelector():
         thread_x.start()
         thread_y.start()
 
+        start_time = time.time()
         try:
-            while True:
+            while time.time() - start_time < 2:
+                self.console_out.refresh()
                 time.sleep(0.1)
+
+            self.stop_event.set()
+            self.stop_curses
 
         except KeyboardInterrupt:
             self.stop_event.set()
             thread_x.join()
             thread_y.join()
-            self.stop_curses  # Detiene curses
+            self.stop_curses 
 
     def print_all_choices(self):
         while not self.stop_event.is_set():
@@ -72,12 +78,15 @@ class RandomSelector():
 
     def print_selected(self):
         while not self.stop_event.is_set():
+            self.get_random()
+            print(self.selected_letters)
             for letter in range(len(self.selected_letters)):
                 if self.selected_letters[letter] != "":
                     self.console_out.attron(curses.color_pair(self.colors["green"]))
                     self.console_out.addstr(curses.LINES - 1, letter, self.selected_letters[letter])
                     self.console_out.attroff(curses.color_pair(self.colors["green"]))
             time.sleep(self.interval_x)
+
         return
 
 selector = RandomSelector(["apple", "banana", "orange", "grape", "kiwi", "mango", "pear", "peach", "plum", "strawberry"])

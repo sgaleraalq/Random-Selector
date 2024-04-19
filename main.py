@@ -10,7 +10,8 @@ class RandomSelector():
         self.console_out        = curses.initscr()
         self.height             = self.console_out.getmaxyx()[0]-2
         self.lines              = int(self.height / 2) if self.height % 2 == 0 else int((self.height + 1) / 2)
-        self.lines_list         = ["" for _ in range(self.lines)]
+        self.lines_list         = ["banana" for _ in range(self.lines)]
+        self.letters_selected   = ["" for _ in range(len(self.selected))]
 
         curses.start_color()
         curses.init_pair(self.colors["black"], curses.COLOR_BLACK, curses.COLOR_BLACK)
@@ -20,24 +21,6 @@ class RandomSelector():
     def stop_curses(self):
         curses.endwin()
 
-    @property
-    def print_result(self):
-        try: 
-            self.print_other_results()
-            self.console_out.addstr(curses.LINES - 1, 0, "Selected: ", curses.color_pair(self.colors["red"]))
-            self.console_out.addstr(curses.LINES - 1, len("Selected: "), self.selected, curses.color_pair(self.colors["green"]))
-
-            self.console_out.refresh()
-            self.console_out.getch()
-
-        finally: 
-            curses.endwin()
-        
-    def print_other_results(self):
-        for index in range(self.lines):
-            line_position = index*2
-            self.console_out.addstr(line_position, 0, "banana")
-
     def get_random(self, lst: list):
         index = random.choice(lst)
         lst.remove(index)
@@ -45,28 +28,39 @@ class RandomSelector():
 
 
     def all_choices(self, total_time: float):
-        # self.stop_curses
         start_time = time.time()
         end_time = start_time + total_time
-        self.console_out.refresh()
 
         while time.time() < end_time:
             new_choice = random.choice(self.items)
             self.lines_list.pop(0)
             self.lines_list.append(new_choice)
-
-            self.console_out.clear()  # Limpiar la pantalla antes de imprimir la lista
+            self.console_out.clear()
 
             for index, choice in enumerate(self.lines_list):
-                self.console_out.addstr(index * 2, 0, choice)
+                for letter in range(len(choice)):
+                    if letter > len(self.letters_selected) - 1:
+                        pass
+
+                    elif self.letters_selected[letter] == choice[letter]:
+                        self.console_out.attron(curses.color_pair(self.colors["green"]))
+                        self.console_out.addstr(index * 2, letter, choice[letter])
+                        self.console_out.attroff(curses.color_pair(self.colors["green"]))
+                    
+                    else:
+                        self.console_out.addstr(index * 2, letter, choice[letter])
 
             self.console_out.refresh()
-            time.sleep(1)
-            
-        self.stop_curses
+            time.sleep(0.1)
 
-    def show_result(self):
+        if self.console_out.getch():
+            self.stop_curses
+
+        # self.stop_curses
+
+    def show_result(self, time_per_letter: float):
         all_indices = list(range(len(self.selected)))
+        # self.all_choices(time_per_letter * len(self.selected))
 
         try:
             self.console_out.attron(curses.color_pair(self.colors["black"]))
@@ -74,11 +68,12 @@ class RandomSelector():
 
             while all_indices:
                 all_indices, index = self.get_random(all_indices)
+                self.letters_selected[index] = self.selected[index]
                 self.console_out.attron(curses.color_pair(self.colors["green"]))
                 self.console_out.addstr(curses.LINES - 1, index, self.selected[index])
                 self.console_out.attroff(curses.color_pair(self.colors["green"]))
                 self.console_out.refresh()
-                time.sleep(0.5)
+                time.sleep(time_per_letter)
             self.console_out.getch()
 
         finally:
@@ -86,5 +81,5 @@ class RandomSelector():
 
 selector = RandomSelector(["apple", "banana", "orange", "grape", "kiwi", "mango", "pear", "peach", "plum", "strawberry"])
 # selector.print_result
-# selector.show_result()
-selector.all_choices(20)
+# selector.show_result(0.5)
+selector.all_choices(2)

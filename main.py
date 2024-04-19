@@ -35,12 +35,12 @@ class RandomSelector():
 
 
     def show_result(self):
-        remaining_indices = list(range(len(self.selected)))  # Lista de índices disponibles
+        remaining_indices = list(range(len(self.selected)))
 
         while remaining_indices:
-            to_be_added = random.choice(remaining_indices)  # Selecciona un índice aleatorio
+            to_be_added = random.choice(remaining_indices)
             print(to_be_added)
-            remaining_indices.remove(to_be_added)  # Elimina el índice seleccionado de la lista
+            remaining_indices.remove(to_be_added)
             time.sleep(1)
         print(self.selected)
 

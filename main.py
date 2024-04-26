@@ -4,7 +4,7 @@ import threading
 import time
 
 class RandomSelector():
-    def __init__(self, items):
+    def __init__(self, items, time_selected_item=0.5, time_all_items=0.01):
         self.items              = items
         self.selected           = random.choice(self.items)
         self.colors             = {"black": 1, "green": 2}
@@ -14,8 +14,8 @@ class RandomSelector():
         self.lines_list         = None
         self.selected_letters   = None
         self.all_indices        = None
-        self.interval_x         = 0.5
-        self.interval_y         = 0.01
+        self.interval_x         = time_selected_item
+        self.interval_y         = time_all_items
         self.stop_event         = threading.Event()
         self.last_choice        = ""
 

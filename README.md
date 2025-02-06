@@ -2,4 +2,4 @@
 
 Ejemplo del proyecto:
 
-![Vista previa del proyecto](random_selector.gif)
+<img src="random_selector.gif" alt="Vista previa del proyecto" align="middle">

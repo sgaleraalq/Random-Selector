@@ -1,5 +1,5 @@
-import random
 import curses
+import random
 import threading
 import time
 
@@ -104,11 +104,18 @@ class RandomSelector():
 
         return
 
-selector = RandomSelector(["Sergio Galera Alquegui",
-                        "Sergio Fernandez Adan",
-                        "Oliver Kjaerlund",
-                        "Javier Fernandez",
-                        "Maria Sebastiana Whatever",
-                        "Otro Nombre Cualquiera",
-                        "Simplemente Loque Sea"])
+
+algorithm_list = [
+    "binary search algorithm",
+    "quick sort algorithm",
+    "merge sort algorithm",
+    "depth first search algorithm",
+    "breadth first search algorithm",
+    "bubble sort algorithm",
+    "insertion sort algorithm",
+    "selection sort algorithm",
+    "heap sort algorithm"
+]
+
+selector = RandomSelector(algorithm_list)
 selector.main()
